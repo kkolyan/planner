@@ -12,10 +12,34 @@ function ensure_conected() {
     if ($connected) {
         return;
     }
-    $config = parse_ini_file('config.ini');
-    mysql_pconnect($config['mysql.host'], $config['mysql.user'], $config['mysql.password']);
+    $config = load_mysql_config();
+    mysql_pconnect($config->host, $config->user, $config->password);
     mysql_select_db("planner");
     $connected = true;
+}
+
+function load_mysql_config() {
+    $o = new stdClass();
+    $config = parse_ini_file('config.ini');
+    $o->host = $config['mysql.host'];
+    $o->user = $config['mysql.user'];
+    $o->password = $config['mysql.password'];
+    return $o;
+}
+
+function ensure_backup($pattern) {
+    $date = date($pattern);
+    $dir = "../../backups";
+    if (!file_exists($dir)) {
+        mkdir($dir, 0777, true);
+    }
+    $file = "$dir/planner.$date.sql";
+
+    if (!file_exists($file)) {
+        $config = load_mysql_config();
+        $dump = shell_exec("mysqldump --user=$config->user --password=$config->password --host=$config->host planner");
+        file_put_contents($file, $dump);
+    }
 }
 
 function select($q) {
