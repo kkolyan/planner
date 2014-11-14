@@ -5,7 +5,7 @@ function format_date($date, $pattern) {
     return $d->format($pattern);
 }
 
-ensure_backup('d.m.Y');
+ensure_backup('Y.m.d');
 
 class App {
     public $categories;
