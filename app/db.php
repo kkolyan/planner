@@ -1,6 +1,6 @@
 <?
 
-$connected = false;
+$connection = false;
 
 function esc($str) {
     return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
@@ -8,14 +8,15 @@ function esc($str) {
 
 function ensure_conected() {
 
-    global $connected;
-    if (!$connected) {
+    global $connection;
+    if (!$connection) {
         $config = load_mysql_config();
-        mysql_pconnect($config->host, $config->user, $config->password);
+        $connection = mysql_pconnect($config->host, $config->user, $config->password);
         mysql_select_db("planner");
-        $connected = true;
     }
     mysql_query('set names utf8');
+
+    return $connection;
 }
 
 function load_mysql_config() {
@@ -40,6 +41,15 @@ function ensure_backup($pattern) {
         $dump = shell_exec("mysqldump --user=$config->user --password=$config->password --host=$config->host planner");
         file_put_contents($file, $dump);
     }
+}
+
+function esc_sql($str) {
+    $con = ensure_conected();
+    $r = mysql_real_escape_string($str, $con);
+    if (!$r) {
+        throw new Exception();
+    }
+    return $r;
 }
 
 function select($q) {

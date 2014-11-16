@@ -5,6 +5,13 @@ drop table if exists planner_task_comment;
 drop table if exists planner_task;
 drop table if exists planner_category;
 
+drop table if exists planner_db_patch;
+
+create table planner_db_patch (
+  id text,
+  `at` timestamp
+);
+
 create table planner_category (
   id bigint,
   title text,
