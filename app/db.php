@@ -9,13 +9,13 @@ function esc($str) {
 function ensure_conected() {
 
     global $connected;
-    if ($connected) {
-        return;
+    if (!$connected) {
+        $config = load_mysql_config();
+        mysql_pconnect($config->host, $config->user, $config->password);
+        mysql_select_db("planner");
+        $connected = true;
     }
-    $config = load_mysql_config();
-    mysql_pconnect($config->host, $config->user, $config->password);
-    mysql_select_db("planner");
-    $connected = true;
+    mysql_query('set names utf8');
 }
 
 function load_mysql_config() {
