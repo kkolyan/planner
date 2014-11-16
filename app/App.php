@@ -24,13 +24,19 @@ class App {
 
     function log_in($params) {
         $name = esc_sql($params->name);
-        $password = esc_sql($params->password);
+        $password = $params->password;
         if (!$password) {
             throw new Exception();
         }
-        $r = select("select id from planner_user where `name` = '$name' and `password` = '$password'");
+        $r = select("select id, pwd_hash from planner_user where `name` = '$name'");
         if ($r && $r[0]) {
-            $_SESSION['user_id'] = $r[0]->id;
+            $hash = crypt($password, $r[0]->pwd_hash);
+            if ($hash == $r[0]->pwd_hash) {
+                $_SESSION['user_id'] = $r[0]->id;
+            } else {
+                var_dump($r);
+                throw new Exception();
+            }
         }
     }
 

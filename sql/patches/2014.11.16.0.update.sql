@@ -2,9 +2,7 @@
 create table planner_user (
   id bigint auto_increment,
   `name` varchar(64) unique,
-  `password` text,
   pwd_hash text,
-  pwd_salt text,
   primary key (id)
 )
 engine = InnoDB
