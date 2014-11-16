@@ -33,9 +33,6 @@ class App {
             $hash = crypt($password, $r[0]->pwd_hash);
             if ($hash == $r[0]->pwd_hash) {
                 $_SESSION['user_id'] = $r[0]->id;
-            } else {
-                var_dump($r);
-                throw new Exception();
             }
         }
     }
