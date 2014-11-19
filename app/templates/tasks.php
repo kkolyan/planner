@@ -1,65 +1,8 @@
 <html>
-<head>
-    <meta http-equiv="content-type" content="text/html;charset=utf8"/>
-    <script type="text/javascript">
-        function toggle(q) {
-            var o = document.getElementById(q);
-            if (o.className == 'state-hidden') {
-                o.className = 'state-shown';
-            } else {
-                o.className = 'state-hidden';
-            }
-        }
-    </script>
-    <style type="text/css">
-        .state-hidden {
-            display: none;
-        }
-
-        .clickable {
-            cursor: pointer;
-        }
-
-        .time {
-            color: #ccc;
-        }
-        form {
-            display: inline;
-        }
-
-        .linkbutton {
-            border: none;
-            background: none;
-            cursor: pointer;
-        }
-        .linkbutton:hover, .clickable:hover {
-            text-decoration: underline;
-        }
-
-        .controlgroup {
-            /*border-left: 3px solid #484848;*/
-            height: 30px;
-            padding-left: 20px;
-            margin-left: 10px;
-            display: inline;
-        }
-
-        .cite1 {
-            color: blue;
-        }
-        .cite2 {
-            color: #730000;
-        }
-        .cite3 {
-            color: #018100;
-        }
-        .cite4 {
-            color: #c39165;
-        }
-    </style>
-</head>
+<? include '../www/head.php' ?>
 <body>
 <?
+/** @var $this Tasks */
 
 
 if (false) {
@@ -69,15 +12,15 @@ if (false) {
 }
 ?>
 <?
-if ($app->user) {
+if ($this->user) {
     ?>
     <form method="post">
         <input type="hidden" name="method" value="log_out"/>
-        <b><?= $app->user->name ?></b>
+        <b><?= $this->user->name ?></b>
         <input type="submit" value="Выйти"/>
     </form>
     <?
-    if ($app->categories) foreach ($app->categories as $cat) {
+    if ($this->categories) foreach ($this->categories as $cat) {
         ?><h4 class="clickable" onclick="toggle('add_task<?=$cat->id?>')"><?= esc($cat->title) ?></h4>
 
         <form id="add_task<?=$cat->id?>" method="post" class="state-hidden">
@@ -89,13 +32,13 @@ if ($app->user) {
             <input type="submit" value="Добавить Задачу"/>
         </form>
         <ul><?
-        $tasks = $app->tasks_by_category[$cat->id];
+        $tasks = $this->tasks_by_category[$cat->id];
         if ($tasks) {
             foreach ($tasks as $task) {
                 ?><li><span class="clickable" onclick="toggle('task_controls<?=$task->id?>')"><?= esc($task->title) ?>
                     <span class="time">(<?=esc($task->opened_at)?>)</span></span>
                 <?
-                if ($comments = $app->comments_by_task[$task->id]) {
+                if ($comments = $this->comments_by_task[$task->id]) {
 
                     ?><ul><?
                     foreach ($comments as $comment) {
@@ -129,7 +72,7 @@ if ($app->user) {
                     </div>
                     <div class="controlgroup">
                         <?
-                        foreach ($app->categories as $innerCat) {
+                        foreach ($this->categories as $innerCat) {
                             if ($innerCat->id != $cat->id) {
                                 ?>
                                 <form method="post">
@@ -155,7 +98,7 @@ if ($app->user) {
     <h4>История</h4>
 
     <?
-    foreach ($app->events_by_day as $day => $events) {
+    foreach ($this->events_by_day as $day => $events) {
 
     ?><?=$day?><?
         ?><ul><?

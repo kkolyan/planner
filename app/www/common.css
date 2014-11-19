@@ -1,0 +1,45 @@
+
+.state-hidden {
+    display: none;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.time {
+    color: #ccc;
+}
+form {
+    display: inline;
+}
+
+.linkbutton {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+.linkbutton:hover, .clickable:hover {
+    text-decoration: underline;
+}
+
+.controlgroup {
+    /*border-left: 3px solid #484848;*/
+    height: 30px;
+    padding-left: 20px;
+    margin-left: 10px;
+    display: inline;
+}
+
+.cite1 {
+    color: blue;
+}
+.cite2 {
+    color: #730000;
+}
+.cite3 {
+    color: #018100;
+}
+.cite4 {
+    color: #c39165;
+}

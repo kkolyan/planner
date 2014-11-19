@@ -45,11 +45,22 @@ function ensure_backup($pattern) {
 
 function esc_sql($str) {
     $con = ensure_conected();
+    if ($str === '') {
+        return $str;
+    }
     $r = mysql_real_escape_string($str, $con);
     if (!$r) {
         throw new Exception();
     }
     return $r;
+}
+
+function selectCell($q) {
+    $rows = select($q);
+    $row = $rows[0];
+    $cells = get_object_vars($row);
+    $labels = array_keys($cells);
+    return $cells[$labels[0]];
 }
 
 function select($q) {
@@ -74,10 +85,11 @@ function update($q) {
     ensure_conected();
     mysql_query($q);
     err($q);
+    return mysql_affected_rows();
 }
 
 function err($q) {
     if ($error = mysql_error()) {
-        throw new Exception("Failed to execute '$q' due to: $error");
+        throw new Exception("Failed to execute '$q' due to: $error", mysql_errno());
     }
 }

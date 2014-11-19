@@ -1,14 +1,10 @@
 <?
-session_start();
 
-function format_date($date, $pattern) {
-    $d = new DateTime($date);
-    return $d->format($pattern);
-}
+require_once 'mvc.php';
 
 ensure_backup('Y.m.d');
 
-class App {
+class Tasks extends Page {
     public $categories;
     public $tasks;
     public $comments;
@@ -16,7 +12,6 @@ class App {
     public $tasks_by_category;
     public $comments_by_task;
     public $events_by_day;
-    public $user;
 
     function log_out($params) {
         unset($_SESSION['user_id']);
@@ -71,16 +66,12 @@ class App {
         }
     }
 
-    function __prepare_to_show() {
-        $user_id = $_SESSION['user_id'];
-        if ($user_id) {
-            $users = select("select id, `name` from planner_user where id = $user_id");
-            $this->user = $users[0];
-        }
-        if (!$this->user) {
-            unset($_SESSION['user_id']);
-        }
+    function __do_get() {
+        parent::__do_get();
+
         if ($this->user) {
+
+            $user_id = $this->user->id;
 
             $this->categories = select('select * from planner_category order by `order` asc');
             $this->tasks = select("select * from planner_task where user_id = $user_id order by `order` asc");
@@ -123,6 +114,8 @@ class App {
                 return $d->format('d.m.Y');
             });
         }
+
+        include "templates/tasks.php";
     }
 
     private function move_task($task_id, $up) {
