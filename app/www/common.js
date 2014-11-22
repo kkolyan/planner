@@ -17,6 +17,14 @@ function register_tag(name) {
     tags.push(name);
 }
 
+function toggle_tags_except(name) {
+    for (var i = 0; i < tags.length; i ++) {
+        if (tags[i] != name) {
+            toggle_tag(tags[i]);
+        }
+    }
+}
+
 function toggle_tag(name) {
 
     var tasks;

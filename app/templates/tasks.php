@@ -9,7 +9,7 @@
 if ($this->user) {
     ?><div class="task-tags-section"><?
         foreach ($this->tags as $tag => $freq) {
-            ?><span id="tag-<?=esc($tag)?>" class="task-tag-visible" onclick="toggle_tag('<?=esc($tag)?>')"><?=esc($tag)?> (<?=$freq?>)</span>
+            ?><span id="tag-<?=esc($tag)?>" class="task-tag-visible" onclick="toggle_tag('<?=esc($tag)?>')" ondblclick="toggle_tags_except('<?=esc($tag)?>')"><?=esc($tag)?> (<?=$freq?>)</span>
             <script>register_tag('<?=esc($tag)?>')</script>
             <?
         }
