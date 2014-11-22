@@ -47,3 +47,7 @@ form {
 pre {
     white-space: pre-wrap;
 }
+
+h4 {
+    margin-bottom: 0;
+}
