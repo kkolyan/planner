@@ -51,3 +51,7 @@ pre {
 h4 {
     margin-bottom: 0;
 }
+
+.category-section {
+    border-bottom: solid #ccc 1px;
+}

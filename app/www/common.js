@@ -6,40 +6,52 @@ function toggle(q) {
     } else {
         o.className = 'state-hidden';
     }
-    var toggles = getToggles();
+    var toggles = getUISetting('toggles');
     toggles[q] = o.className;
-    setToggles(toggles);
+    saveUISettings();
 }
 
 function update_toggles() {
 
-    var toggles = getToggles();
-
-    for (var key in toggles) {
-        var element = document.getElementById(key);
-        if (element) {
-            element.className = toggles[key];
+    var toggles = getUISetting('toggles');
+    if (toggles) {
+        for (var key in toggles) {
+            var element = document.getElementById(key);
+            if (element) {
+                element.className = toggles[key];
+            }
         }
     }
 
-    if (!toggles) {
-        var expires = new Date( new Date().getTime() + 3000*24*60*60*1000 );
-        document.cookie = 'toggles=;expires='+expires.toUTCString();
-    }
 }
 
-function getToggles() {
-    var togglesC = getCookie('toggles');
-    if (!togglesC) {
-        return {};
+var settings;
+
+function getUISetting(name) {
+    ensureUISettings();
+    var setting = settings[name];
+    if (!setting) {
+        setting = settings[name] = {};
     }
-    return JSON.parse(togglesC);
+    return setting;
 }
 
-function setToggles(toggles) {
-    var value = JSON.stringify(toggles);
+function ensureUISettings() {
+    if (!settings) {
+        var value = getCookie('ui-settings');
+        if (!value) {
+            settings = {};
+        } else {
+            settings = JSON.parse(value);
+        }
+    }
+    return settings;
+}
+
+function saveUISettings() {
+    var value = JSON.stringify(settings);
     var expires = new Date( new Date().getTime() + 3000*24*60*60*1000 );
-    document.cookie = 'toggles='+encodeURIComponent(value)+';expires='+expires.toUTCString();
+    document.cookie = 'ui-settings='+encodeURIComponent(value)+';expires='+expires.toUTCString();
 }
 
 // возвращает cookie с именем name, если есть, если нет, то undefined

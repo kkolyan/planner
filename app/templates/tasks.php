@@ -10,87 +10,91 @@ if ($this->user) {
     if ($this->categories) foreach ($this->categories as $cat) {
         ?><h4 class="clickable" onclick="toggle('tasks<?=$cat->id?>')"><?= esc($cat->title) ?></h4>
         <div id="tasks<?=$cat->id?>">
-            <form method="post" style="float: right">
-                <input type="hidden" name="method" value="add_task"/>
-                <input type="hidden" name="category_id" value="<?= esc($cat->id) ?>"/>
-                <label>
-                    <textarea name="title"></textarea>
-                </label>
-                <input type="submit" value="Добавить Задачу"/>
-            </form>
-            <ul><?
-                $tasks = $this->tasks_by_category[$cat->id];
-                if ($tasks) {
-                    foreach ($tasks as $task) {
-                        ?><li><span class="clickable" onclick="toggle('task_controls<?=$task->id?>')"><?= esc($task->title) ?>
-                            <span class="time">(<?=esc($task->opened_at)?>)</span></span>
-                        <div id="task_controls<?=$task->id?>" class="state-hidden">
-                            <div class="controlgroup">
-                                <form method="post">
-                                    <input type="hidden" name="method" value="add_comment"/>
-                                    <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                                    <label>
-                                        <textarea name="content"></textarea>
-                                    </label>
-                                    <input type="submit" value="Добавить Комментарий"/>
-                                </form>
-                            </div>
-                            <div class="controlgroup">
-                                <form method="post">
-                                    <input type="hidden" name="method" value="move_task_up"/>
-                                    <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                                    <input type="submit" value="Поднять выше"/>
-                                </form>
-                                <form method="post">
-                                    <input type="hidden" name="method" value="move_task_down"/>
-                                    <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                                    <input type="submit" value="Опустить ниже"/>
-                                </form>
-                            </div>
-                            <div class="controlgroup">
-                                <form method="post">
-                                    <input type="hidden" name="method" value="full_move_task_up"/>
-                                    <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                                    <input type="submit" value="В самый верх"/>
-                                </form>
-                                <form method="post">
-                                    <input type="hidden" name="method" value="full_move_task_down"/>
-                                    <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                                    <input type="submit" value="В самый низ"/>
-                                </form>
-                            </div>
-                            <div class="controlgroup">
-                                <?
-                                foreach ($this->categories as $innerCat) {
-                                    if ($innerCat->id != $cat->id) {
-                                        ?>
-                                        <form method="post">
-                                            <input type="hidden" name="category_id" value="<?=$innerCat->id?>"/>
-                                            <input type="hidden" name="method" value="change_category"/>
-                                            <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                                            <input type="submit" value="В <?=esc($innerCat->title)?>"/>
-                                        </form>
+            <div class="category-section">
+                <form method="post" style="float: right">
+                    <input type="hidden" name="method" value="add_task"/>
+                    <input type="hidden" name="category_id" value="<?= esc($cat->id) ?>"/>
+                    <label>
+                        <textarea name="title" cols="40"></textarea>
+                    </label>
+                    <br/>
+                    <input type="submit" value="Добавить Задачу"/>
+                </form>
+                <ul><?
+                    $tasks = $this->tasks_by_category[$cat->id];
+                    if ($tasks) {
+                        foreach ($tasks as $task) {
+                            ?><li><span class="clickable" onclick="toggle('task_controls<?=$task->id?>')"><?= esc($task->title) ?>
+                                <span class="time">(<?=esc($task->opened_at)?>)</span></span>
+                            <div id="task_controls<?=$task->id?>" class="state-hidden">
+                                <div class="controlgroup">
+                                    <form method="post">
+                                        <input type="hidden" name="method" value="add_comment"/>
+                                        <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                                        <label>
+                                            <textarea name="content"></textarea>
+                                        </label>
+                                        <input type="submit" value="Добавить Комментарий"/>
+                                    </form>
+                                </div>
+                                <div class="controlgroup">
+                                    <form method="post">
+                                        <input type="hidden" name="method" value="move_task_up"/>
+                                        <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                                        <input type="submit" value="Поднять выше"/>
+                                    </form>
+                                    <form method="post">
+                                        <input type="hidden" name="method" value="move_task_down"/>
+                                        <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                                        <input type="submit" value="Опустить ниже"/>
+                                    </form>
+                                </div>
+                                <div class="controlgroup">
+                                    <form method="post">
+                                        <input type="hidden" name="method" value="full_move_task_up"/>
+                                        <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                                        <input type="submit" value="В самый верх"/>
+                                    </form>
+                                    <form method="post">
+                                        <input type="hidden" name="method" value="full_move_task_down"/>
+                                        <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                                        <input type="submit" value="В самый низ"/>
+                                    </form>
+                                </div>
+                                <div class="controlgroup">
                                     <?
+                                    foreach ($this->categories as $innerCat) {
+                                        if ($innerCat->id != $cat->id) {
+                                            ?>
+                                            <form method="post">
+                                                <input type="hidden" name="category_id" value="<?=$innerCat->id?>"/>
+                                                <input type="hidden" name="method" value="change_category"/>
+                                                <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                                                <input type="submit" value="В <?=esc($innerCat->title)?>"/>
+                                            </form>
+                                        <?
+                                        }
                                     }
-                                }
-                                ?>
-                            </div class="controlgroup">
-                        </div>
-                        <?
-                        if ($comments = $this->comments_by_task[$task->id]) {
+                                    ?>
+                                </div class="controlgroup">
+                            </div>
+                            <?
+                            if ($comments = $this->comments_by_task[$task->id]) {
 
-                            ?><ul><?
-                            foreach ($comments as $comment) {
-                                ?><li><pre style="display: inline"><?=esc($comment->content)?></pre> <span class="time">(<?=esc($comment->posted_at)?>)</span></li><?
+                                ?><ul><?
+                                foreach ($comments as $comment) {
+                                    ?><li><pre style="display: inline"><?=esc($comment->content)?></pre> <span class="time">(<?=esc($comment->posted_at)?>)</span></li><?
+                                }
+                                ?></ul><?
                             }
-                            ?></ul><?
+                            ?>
+                            </li><?
                         }
-                        ?>
-                        </li><?
                     }
-                }
-                ?>
-            </ul>
+                    ?>
+                </ul>
+                <div style="clear: both;"></div>
+            </div>
         </div>
     <?
     }
