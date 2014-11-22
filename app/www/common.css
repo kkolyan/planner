@@ -72,3 +72,31 @@ th {
 table {
     border-collapse: collapse;
 }
+
+.task-tags-section {
+    padding-top: 8px;
+}
+
+.task-tag-visible,.task-tag-hidden {
+    border: 1px solid #018100;
+    background-color: rgb(147, 236, 134);
+    padding: 0 10px;
+    color: #018100;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.task-tag-hidden {
+    border-color: #817d7d;
+    background-color: rgb(236, 229, 228);
+    padding: 0 10px;
+    color: #80817d;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.task-hidden {
+    display: none;
+}

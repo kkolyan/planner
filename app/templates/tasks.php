@@ -7,6 +7,13 @@
 ?>
 <?
 if ($this->user) {
+    ?><div class="task-tags-section"><?
+        foreach ($this->tags as $tag => $freq) {
+            ?><span id="tag-<?=esc($tag)?>" class="task-tag-visible" onclick="toggle_tag('<?=esc($tag)?>')"><?=esc($tag)?> (<?=$freq?>)</span>
+            <script>register_tag('<?=esc($tag)?>')</script>
+            <?
+        }
+    ?></div><?
     if ($this->categories) foreach ($this->categories as $cat) {
         ?><h4 class="clickable" onclick="toggle('tasks<?=$cat->id?>')"><?= esc($cat->title) ?></h4>
         <div id="tasks<?=$cat->id?>">
@@ -24,7 +31,7 @@ if ($this->user) {
                     $tasks = $this->tasks_by_category[$cat->id];
                     if ($tasks) {
                         foreach ($tasks as $task) {
-                            ?><li><span class="clickable" onclick="toggle('task_controls<?=$task->id?>')"><?= esc($task->title) ?>
+                            ?><li title="<?=esc($task->title)?>" class="task-visible"><span class="clickable" onclick="toggle('task_controls<?=$task->id?>')"><?= esc($task->title) ?>
                                 <span class="time">(<?=esc($task->opened_at)?>)</span></span>
                             <div id="task_controls<?=$task->id?>" class="state-hidden">
                                 <div class="controlgroup">

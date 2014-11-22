@@ -11,6 +11,54 @@ function toggle(q) {
     saveUISettings();
 }
 
+var tags = [];
+
+function register_tag(name) {
+    tags.push(name);
+}
+
+function toggle_tag(name) {
+
+    var tasks;
+    var taskClassToSet;
+
+    var buttonId = 'tag-'+name;
+    var button = document.getElementById(buttonId);
+    if (button.className == 'task-tag-visible') {
+        button.className = 'task-tag-hidden';
+        tasks = document.getElementsByClassName('task-visible');
+        taskClassToSet = 'task-hidden';
+    } else {
+        button.className = 'task-tag-visible';
+        tasks = document.getElementsByClassName('task-hidden');
+        taskClassToSet = 'task-visible';
+    }
+    var tasksCopy = [];
+    var taskN;
+    for (taskN = 0; taskN < tasks.length; taskN ++) {
+        tasksCopy.push(tasks[taskN]);
+    }
+    for (taskN = 0; taskN < tasksCopy.length; taskN ++) {
+        var task = tasksCopy[taskN];
+        if (true) {
+            if (name == '') {
+                if (!/\[[A-z0-9 ]*\]/.test(task.title)) {
+                    task.className = taskClassToSet;
+                }
+            } else {
+                if (task.title.indexOf('['+name+']') >= 0) {
+                    task.className = taskClassToSet;
+                }
+            }
+        }
+    }
+
+    var toggles = getUISetting('toggles');
+    toggles[buttonId] = button.className;
+
+    saveUISettings();
+}
+
 function update_toggles() {
 
     var toggles = getUISetting('toggles');
@@ -21,6 +69,11 @@ function update_toggles() {
                 element.className = toggles[key];
             }
         }
+    }
+
+    for (var i = 0; i < tags.length; i ++) {
+        toggle_tag(tags[i]);
+        toggle_tag(tags[i]);
     }
 
 }

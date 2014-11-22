@@ -12,6 +12,7 @@ class Tasks extends UserPage {
     public $tasks_by_category;
     public $comments_by_task;
     public $events_by_day;
+    public $tags;
 
     function add_task($params) {
         if ($user_id = $_SESSION['user_id']) {
@@ -123,6 +124,21 @@ class Tasks extends UserPage {
                         where task_id in (select id from planner_task where user_id = $user_id)
                 ) s order by s.`at` desc
             ");
+
+            $this->tags = array();
+            foreach ($this->tasks as $task) {
+                preg_match_all('/\[([A-z0-9 ]*?)\]/',$task->title, $matches);
+                if (!$matches[1]) {
+                    $matches[1] = array('');
+                }
+                foreach ($matches[1] as $tag) {
+                    $c = $this->tags[$tag];
+                    if (!$c) {
+                        $c = 0;
+                    }
+                    $this->tags[$tag] = $c + 1;
+                }
+            }
 
             $this->tasks_by_category = mapBy($this->tasks, function($i) {
                 return $i->category_id;
