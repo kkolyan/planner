@@ -55,3 +55,20 @@ h4 {
 .category-section {
     border-bottom: solid #ccc 1px;
 }
+
+td, th {
+    border: 1px solid #7f7f7f;
+}
+
+tr:nth-child(odd) {
+    background-color: #ededed;
+}
+
+th {
+    font-weight: bold;
+    background-color: #ccc;
+}
+
+table {
+    border-collapse: collapse;
+}
