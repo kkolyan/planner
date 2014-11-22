@@ -13,7 +13,7 @@ class LoginPage extends Page {
         $name = esc_sql($params->name);
         $password = $params->password;
         if (!$password) {
-            throw new Exception();
+            return;
         }
         $r = select("select id, pwd_hash from planner_user where `name` = '$name'");
         if ($r && $r[0]) {
