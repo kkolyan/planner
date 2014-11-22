@@ -43,3 +43,7 @@ form {
 .cite4 {
     color: #c39165;
 }
+
+pre {
+    white-space: pre-wrap;
+}
