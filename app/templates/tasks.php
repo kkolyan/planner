@@ -13,7 +13,10 @@ if ($this->user) {
             <script>register_tag('<?=esc($tag)?>')</script>
             <?
         }
-    ?></div><?
+        $hint = 'Для создания тегов используйте квадратные скобки. например: [работа] распечатать документы';
+    ?>
+    <a title="<?=$hint?>" href="javascript:alert('<?=$hint?>')"><b> ? </b></a>
+    </div><?
     if ($this->categories) foreach ($this->categories as $cat) {
         ?><h4><span class="clickable" onclick="toggle('tasks<?=$cat->id?>')"><?= esc($cat->title) ?></span></h4>
         <div id="tasks<?=$cat->id?>">
