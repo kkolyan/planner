@@ -90,7 +90,7 @@ if ($this->user) {
 
                                 ?><ul><?
                                 foreach ($comments as $comment) {
-                                    ?><li><pre style="display: inline"><?=esc($comment->content)?></pre> <span class="time">(<?=esc($comment->posted_at)?>)</span></li><?
+                                    ?><li><pre style="display: inline"><?=links(esc($comment->content))?></pre> <span class="time">(<?=esc($comment->posted_at)?>)</span></li><?
                                 }
                                 ?></ul><?
                             }

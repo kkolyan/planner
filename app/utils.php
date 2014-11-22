@@ -11,6 +11,13 @@ function endsWith($str, $prefix) {
 }
 
 
+function links($text) {
+    $text = preg_replace(
+        "#((http|https|ftp)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s)#ie",
+        "'<a href=\"$1\" target=\"_blank\">$1</a>$4'", $text);
+    return $text;
+}
+
 assert(startsWith('123456', '123'));
 assert(endsWith('123456', '456'));
 

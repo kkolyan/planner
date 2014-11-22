@@ -16,7 +16,9 @@ class Tasks extends UserPage {
 
     function add_task($params) {
         if ($user_id = $_SESSION['user_id']) {
-            $task_id = insert("insert into planner_task (category_id, title, `order`, user_id) values ($params->category_id, '".esc_sql($params->title)."',(select min(`order`) from planner_task where category_id = $params->category_id) - 1, $user_id)");
+            $smallest_order = selectCell("select min(`order`) from planner_task where category_id = $params->category_id");
+            $smallest_order = intval($smallest_order);
+            $task_id = insert("insert into planner_task (category_id, title, `order`, user_id) values ($params->category_id, '".esc_sql($params->title)."',$smallest_order - 1, $user_id)");
         }
     }
 
