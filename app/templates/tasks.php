@@ -24,16 +24,6 @@ if ($this->user) {
             foreach ($tasks as $task) {
                 ?><li><span class="clickable" onclick="toggle('task_controls<?=$task->id?>')"><?= esc($task->title) ?>
                     <span class="time">(<?=esc($task->opened_at)?>)</span></span>
-                <?
-                if ($comments = $this->comments_by_task[$task->id]) {
-
-                    ?><ul><?
-                    foreach ($comments as $comment) {
-                        ?><li><pre style="display: inline"><?=esc($comment->content)?></pre> <span class="time">(<?=esc($comment->posted_at)?>)</span></li><?
-                    }
-                    ?></ul><?
-                }
-                ?>
                 <div id="task_controls<?=$task->id?>" class="state-hidden">
                     <div class="controlgroup">
                         <form method="post">
@@ -49,12 +39,12 @@ if ($this->user) {
                         <form method="post">
                             <input type="hidden" name="method" value="move_task_up"/>
                             <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                            <input type="submit" value="Выше"/>
+                            <input type="submit" value="Поднять выше"/>
                         </form>
                         <form method="post">
                             <input type="hidden" name="method" value="move_task_down"/>
                             <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                            <input type="submit" value="Ниже"/>
+                            <input type="submit" value="Опустить ниже"/>
                         </form>
                     </div>
                     <div class="controlgroup">
@@ -86,6 +76,16 @@ if ($this->user) {
                         ?>
                     </div class="controlgroup">
                 </div>
+                <?
+                if ($comments = $this->comments_by_task[$task->id]) {
+
+                    ?><ul><?
+                    foreach ($comments as $comment) {
+                        ?><li><pre style="display: inline"><?=esc($comment->content)?></pre> <span class="time">(<?=esc($comment->posted_at)?>)</span></li><?
+                    }
+                    ?></ul><?
+                }
+                ?>
                 </li><?
             }
         }
