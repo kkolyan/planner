@@ -31,8 +31,8 @@ if ($this->user) {
                     $tasks = $this->tasks_by_category[$cat->id];
                     if ($tasks) {
                         foreach ($tasks as $task) {
-                            ?><li title="<?=esc($task->title)?>" class="task-visible"><span class="clickable" onclick="toggle('task_controls<?=$task->id?>')"><?= esc($task->title) ?>
-                                <span class="time">(<?=esc($task->opened_at)?>)</span></span>
+                            ?><li title="<?=esc($task->title)?>" class="task-visible"><span><?= links(esc($task->title)) ?>
+                                <span class="time clickable" onclick="toggle('task_controls<?=$task->id?>')">(<?=esc($task->opened_at)?>)</span></span>
                             <div id="task_controls<?=$task->id?>" class="state-hidden">
                                 <div class="controlgroup">
                                     <form method="post">
