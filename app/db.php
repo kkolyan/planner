@@ -56,9 +56,14 @@ function esc_sql($str) {
     return $r;
 }
 
-function selectCell($q) {
+function selectRow($q) {
     $rows = select($q);
     $row = $rows[0];
+    return $row;
+}
+
+function selectCell($q) {
+    $row = selectRow($q);
     $cells = get_object_vars($row);
     $labels = array_keys($cells);
     return $cells[$labels[0]];

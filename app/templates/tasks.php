@@ -49,12 +49,24 @@ if ($this->user) {
                         <form method="post">
                             <input type="hidden" name="method" value="move_task_up"/>
                             <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                            <input type="submit" value="Поднять"/>
+                            <input type="submit" value="Выше"/>
                         </form>
                         <form method="post">
                             <input type="hidden" name="method" value="move_task_down"/>
                             <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                            <input type="submit" value="Спустить"/>
+                            <input type="submit" value="Ниже"/>
+                        </form>
+                    </div>
+                    <div class="controlgroup">
+                        <form method="post">
+                            <input type="hidden" name="method" value="full_move_task_up"/>
+                            <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                            <input type="submit" value="В самый верх"/>
+                        </form>
+                        <form method="post">
+                            <input type="hidden" name="method" value="full_move_task_down"/>
+                            <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                            <input type="submit" value="В самый низ"/>
                         </form>
                     </div>
                     <div class="controlgroup">
