@@ -15,7 +15,7 @@ if ($this->user) {
         }
     ?></div><?
     if ($this->categories) foreach ($this->categories as $cat) {
-        ?><h4 class="clickable" onclick="toggle('tasks<?=$cat->id?>')"><?= esc($cat->title) ?></h4>
+        ?><h4><span class="clickable" onclick="toggle('tasks<?=$cat->id?>')"><?= esc($cat->title) ?></span></h4>
         <div id="tasks<?=$cat->id?>">
             <div class="category-section">
                 <form method="post" style="float: right">
