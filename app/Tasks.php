@@ -4,7 +4,7 @@ require_once 'mvc.php';
 
 ensure_backup('Y.m.d');
 
-class Tasks extends Page {
+class Tasks extends UserPage {
     public $categories;
     public $tasks;
     public $comments;
@@ -12,25 +12,6 @@ class Tasks extends Page {
     public $tasks_by_category;
     public $comments_by_task;
     public $events_by_day;
-
-    function log_out($params) {
-        unset($_SESSION['user_id']);
-    }
-
-    function log_in($params) {
-        $name = esc_sql($params->name);
-        $password = $params->password;
-        if (!$password) {
-            throw new Exception();
-        }
-        $r = select("select id, pwd_hash from planner_user where `name` = '$name'");
-        if ($r && $r[0]) {
-            $hash = crypt($password, $r[0]->pwd_hash);
-            if ($hash == $r[0]->pwd_hash) {
-                $_SESSION['user_id'] = $r[0]->id;
-            }
-        }
-    }
 
     function add_task($params) {
         if ($user_id = $_SESSION['user_id']) {

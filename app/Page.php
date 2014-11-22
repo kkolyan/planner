@@ -1,5 +1,7 @@
 <?
 
+require_once 'utils.php';
+
 class Page {
     public $user;
 
@@ -11,17 +13,32 @@ class Page {
     function __do_get() {
     }
 
-    function __prepare() {
+    function  __do_post() {
+        $params = new AutoParams();
+        foreach ($_POST as $k => $v) {
+            $params->$k = $v;
+        }
+        $m = $params->method;
 
-        /** @var $app Page */
-        $user_id = $_SESSION['user_id'];
-        if ($user_id) {
-            $users = select("select id, `name`, admin from planner_user where id = $user_id");
-            $this->user = $users[0];
+        $this->$m($params);
+    }
+
+    function  __do_service() {
+
+        foreach ($_GET as $k => $v) {
+            $this->$k = $v;
         }
-        if (!$this->user) {
-            unset($_SESSION['user_id']);
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && !startsWith($_POST['method'], '__')) {
+            $this->__do_post();
+
+            $this->__after_post();
+        } else {
+            $this->__do_get();
         }
+    }
+
+    function  __prepare() {
     }
 
     function __construct() {
@@ -29,20 +46,10 @@ class Page {
         try {
             $this->__prepare();
 
-            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                $params = new stdClass();
-                foreach ($_POST as $k => $v) {
-                    $params->$k = $v;
-                }
-                $m = $params->method;
+            $this->__do_service();
 
-                $this->$m($params);
-
-                $this->__after_post();
-            } else {
-                $this->__do_get();
-            }
-
+        } catch (HttpStatusException $e) {
+            $e->sendHttpStatus();
         } catch (Exception $e) {
             ?><pre><?= $e ?></pre>Code: <?=$e->getCode()?><?
         }

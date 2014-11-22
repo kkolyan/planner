@@ -1,25 +1,12 @@
 <html>
 <? include '../www/head.php' ?>
 <body>
+<? include 'menu.php' ?>
 <?
 /** @var $this Tasks */
-
-
-if (false) {
-    ?><pre><?
-    var_dump(get_defined_vars());
-    ?></pre><?
-}
 ?>
 <?
 if ($this->user) {
-    ?>
-    <form method="post">
-        <input type="hidden" name="method" value="log_out"/>
-        <b><?= $this->user->name ?></b>
-        <input type="submit" value="Выйти"/>
-    </form>
-    <?
     if ($this->categories) foreach ($this->categories as $cat) {
         ?><h4 class="clickable" onclick="toggle('add_task<?=$cat->id?>')"><?= esc($cat->title) ?></h4>
 
@@ -113,21 +100,6 @@ if ($this->user) {
         }
         ?></ul><?
     }
-} else {
-    ?>
-    <form method="post">
-        <input type="hidden" name="method" value="log_in"/>
-        <label>
-            Ник
-            <input name="name"/>
-        </label>
-        <label>
-            Пароль
-            <input type="password" name="password"/>
-        </label>
-        <input type="submit" value="Войти"/>
-    </form>
-    <?
 }
 ?>
 </body>

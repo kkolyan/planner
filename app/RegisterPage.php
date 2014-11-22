@@ -47,13 +47,15 @@ class RegisterPage extends Page {
             $this->errors[] = 'Введенные пароли не совпадают';
         }
         if (!$this->errors) {
-            if ($this->is_key_valid($params->invite_key)) {
+            $description = selectCell("select description from planner_invite where `key` = '$params->invite_key__sql'");
+            if ($description) {
                 $name = esc_sql($params->name);
                 $salt = '$6$rounds=5000$'.mt_rand().'$';
                 $hash = esc_sql(crypt($params->password, $salt));
                 try {
-                    insert("INSERT INTO planner_user (`name`, pwd_hash) VALUES ('$name', '$hash')");
-                    update("delete from planner_invite where `key` = '".esc_sql($params->invite_key)."'");
+                    $d_sql = esc_sql($description);
+                    insert("insert into planner_user (`name`, pwd_hash, description) values ('$name', '$hash', '$d_sql')");
+                    update("delete from planner_invite where `key` = '$params->invite_key__sql'");
                     $this->redirect_to = 'register.php?success';
                 } catch (Exception $e) {
                     if ($e->getCode() == 1062) {

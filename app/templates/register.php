@@ -2,11 +2,12 @@
 <html>
 <? include '../www/head.php' ?>
 <body>
+<? include 'menu.php' ?>
 
 <? /** @var $this RegisterPage */?>
 <?
 if ($this->just_success) {
-    ?>Аккаунт успешно создан, теперь вы можете <a href=".">войти</a><?
+    ?>Аккаунт создан, теперь вы можете <a href="login.php">войти</a><?
 } else if ($this->invalid_key) {
     ?>Ключ недействителен или устарел. Пожалуйста обратитесь к администратору<?
 } else {

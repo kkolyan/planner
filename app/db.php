@@ -1,5 +1,7 @@
 <?
 
+require_once 'config.php';
+
 $connection = false;
 
 function esc($str) {
@@ -20,12 +22,7 @@ function ensure_conected() {
 }
 
 function load_mysql_config() {
-    $o = new stdClass();
-    $config = parse_ini_file('config.ini');
-    $o->host = $config['mysql.host'];
-    $o->user = $config['mysql.user'];
-    $o->password = $config['mysql.password'];
-    return $o;
+    return get_config('mysql.');
 }
 
 function ensure_backup($pattern) {
@@ -37,10 +34,14 @@ function ensure_backup($pattern) {
     $file = "$dir/planner.$date.sql";
 
     if (!file_exists($file)) {
-        $config = load_mysql_config();
-        $dump = shell_exec("mysqldump --user=$config->user --password=$config->password --host=$config->host planner");
+        $dump = get_dump();
         file_put_contents($file, $dump);
     }
+}
+
+function get_dump() {
+    $config = load_mysql_config();
+    return shell_exec("mysqldump --user=$config->user --password=$config->password --host=$config->host planner");
 }
 
 function esc_sql($str) {
