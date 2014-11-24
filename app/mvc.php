@@ -9,6 +9,8 @@ session_start();
 
 require_once 'db.php';
 
+set_mysql_timezone($tz);
+
 require_once 'Page.php';
 
 require_once 'AdminPage.php';

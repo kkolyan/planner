@@ -4,12 +4,20 @@ require_once 'config.php';
 
 $connection = false;
 
+$mysql_timezone = false;
+
 function esc($str) {
     return htmlspecialchars($str, ENT_QUOTES, "UTF-8");
 }
 
+function set_mysql_timezone($tz) {
+    global $mysql_timezone;
+    $mysql_timezone = $tz;
+}
+
 function ensure_conected() {
 
+    global $mysql_timezone;
     global $connection;
     if (!$connection) {
         $config = load_mysql_config();
@@ -17,6 +25,7 @@ function ensure_conected() {
         mysql_select_db("planner");
     }
     mysql_query('set names utf8');
+    mysql_query("set time_zone = '".esc_sql($mysql_timezone)."'");
 
     return $connection;
 }
