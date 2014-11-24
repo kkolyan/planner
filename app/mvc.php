@@ -3,7 +3,7 @@ $tz = $_COOKIE['tz'];
 if (!$tz) {
     $tz = 'GMT';
 }
-date_default_timezone_set($_COOKIE['tz']);
+date_default_timezone_set($tz);
 
 session_start();
 
