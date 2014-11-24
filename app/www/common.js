@@ -84,6 +84,9 @@ function update_toggles() {
         toggle_tag(tags[i]);
     }
 
+    var tz = jstz.determine();
+    setCookie("tz",tz.name());
+
 }
 
 var settings;
@@ -112,7 +115,11 @@ function ensureUISettings() {
 function saveUISettings() {
     var value = JSON.stringify(settings);
     var expires = new Date( new Date().getTime() + 3000*24*60*60*1000 );
-    document.cookie = 'ui-settings='+encodeURIComponent(value)+';expires='+expires.toUTCString();
+    setCookie('ui-settings', value, expires.toUTCString());
+}
+
+function setCookie(name,value,expires) {
+    document.cookie = name+'='+encodeURIComponent(value)+';expires='+expires;
 }
 
 // возвращает cookie с именем name, если есть, если нет, то undefined
