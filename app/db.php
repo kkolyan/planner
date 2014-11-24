@@ -15,19 +15,24 @@ function set_mysql_timezone($tz) {
     $mysql_timezone = $tz;
 }
 
-function ensure_conected() {
+function ensure_connected() {
 
-    global $mysql_timezone;
     global $connection;
     if (!$connection) {
         $config = load_mysql_config();
         $connection = mysql_pconnect($config->host, $config->user, $config->password);
         mysql_select_db("planner");
     }
+    return $connection;
+}
+
+function configure() {
+    global $mysql_timezone;
+
+    ensure_connected();
+
     mysql_query('set names utf8');
     mysql_query("set time_zone = '".esc_sql($mysql_timezone)."'");
-
-    return $connection;
 }
 
 function load_mysql_config() {
@@ -54,7 +59,7 @@ function get_dump() {
 }
 
 function esc_sql($str) {
-    $con = ensure_conected();
+    $con = ensure_connected();
     if ($str === '') {
         return $str;
     }
@@ -79,7 +84,7 @@ function selectCell($q) {
 }
 
 function select($q) {
-    ensure_conected();
+    configure();
     $rows = array();
     $rs = mysql_query($q);
     err($q);
@@ -90,14 +95,14 @@ function select($q) {
 }
 
 function insert($q) {
-    ensure_conected();
+    configure();
     mysql_query($q);
     err($q);
     return mysql_insert_id();
 }
 
 function update($q) {
-    ensure_conected();
+    configure();
     mysql_query($q);
     err($q);
     return mysql_affected_rows();
