@@ -131,7 +131,7 @@ class Tasks extends UserPage {
 
             $this->tags = array();
             foreach ($this->tasks as $task) {
-                preg_match_all('/\[([A-z0-9 ]*?)\]/',$task->title, $matches);
+                preg_match_all('/\[([A-z0-9А-я ]*?)\]/u',$task->title, $matches);
                 if (!$matches[1]) {
                     $matches[1] = array('');
                 }

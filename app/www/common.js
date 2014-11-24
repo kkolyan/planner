@@ -50,7 +50,7 @@ function toggle_tag(name) {
         var task = tasksCopy[taskN];
         if (true) {
             if (name == '') {
-                if (!/\[[A-z0-9 ]*\]/.test(task.title)) {
+                if (!/\[[A-z0-9А-я ]*\]/.test(task.title)) {
                     task.className = taskClassToSet;
                 }
             } else {
