@@ -69,8 +69,10 @@ class Tasks extends UserPage {
                 limit 1
             ");
 
-            update("update planner_task set `order` = $neighbour->order where id = $task->id");
-            update("update planner_task set `order` = $task->order where id = $neighbour->id");
+            if ($neighbour) {
+                update("update planner_task set `order` = $neighbour->order where id = $task->id");
+                update("update planner_task set `order` = $task->order where id = $neighbour->id");
+            }
         }
     }
 
