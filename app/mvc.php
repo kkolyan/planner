@@ -1,5 +1,8 @@
 <?
-date_default_timezone_set($_COOKIE['tz']);
+if (!isset($_COOKIE['tz'])) {
+    date_default_timezone_set($_COOKIE['tz']);
+    throw new Exception("can't find tz cookie!");
+}
 
 session_start();
 

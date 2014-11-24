@@ -85,7 +85,7 @@ function update_toggles() {
     }
 
     var tz = jstz.determine();
-    setCookie("tz",tz.name());
+    setCookie("tz",tz.name(), 'session');
 
 }
 
