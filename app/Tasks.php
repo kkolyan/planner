@@ -8,10 +8,8 @@ class Tasks extends UserPage {
     public $categories;
     public $tasks;
     public $comments;
-    public $events;
     public $tasks_by_category;
     public $comments_by_task;
-    public $events_by_day;
     public $tags;
 
     function add_task($params) {
@@ -102,32 +100,6 @@ class Tasks extends UserPage {
             $this->categories = select('select * from planner_category order by `order` asc');
             $this->tasks = select("select * from planner_task where user_id = $user_id order by `order` asc");
             $this->comments = select('select * from planner_task_comment order by posted_at desc');
-            $this->events = select("
-                select * from (
-                    select opened_at `at`, 'Открыта задача %1 (%2)' f, title a1, id a2, null a3, null a4
-                        from planner_task where user_id = $user_id
-                    union
-                        select closed_at `at`, 'Закрыта задача %1 (%2)' f, title a1, id a2, null a3, null a4
-                        from planner_task
-                        where user_id = $user_id
-                        and closed_at <> null
-                    union
-                        select posted_at `at`,
-                            'Комментарий к задаче %1 (%2): %3' f,
-                            (select title from planner_task where id = task_id) a1,
-                            task_id a2,
-                            content a3, null a4
-                        from planner_task_comment
-                        where task_id in (select id from planner_task where user_id = $user_id)
-                    union
-                        select changed_at `at`, 'Категория задачи %1 (%2) сменена с %3 на %4' f,
-                            (select title from planner_task where id = task_id) a1, task_id a2,
-                            (select title from planner_category where id = source_category_id) a3,
-                            (select title from planner_category where id = target_category_id) a4
-                        from planner_task_category_change
-                        where task_id in (select id from planner_task where user_id = $user_id)
-                ) s order by s.`at` desc
-            ");
 
             $this->tags = array();
             foreach ($this->tasks as $task) {
@@ -149,10 +121,6 @@ class Tasks extends UserPage {
             });
             $this->comments_by_task = mapBy($this->comments, function($i) {
                 return $i->task_id;
-            });
-            $this->events_by_day = mapBy($this->events, function($i) {
-                $d = new DateTime($i->at);
-                return $d->format('d.m.Y');
             });
         }
 

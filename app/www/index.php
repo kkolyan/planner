@@ -1,4 +1,2 @@
 <?
-require_once '../Tasks.php';
-
-new Tasks();
+header('Location: ./tasks.php');
