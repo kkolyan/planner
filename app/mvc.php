@@ -20,7 +20,7 @@ function format_date($date, $pattern) {
     return $d->format($pattern);
 }
 
-function mapBy(&$list,$f) {
+function mapBy(&$list, $f, $vf=null) {
     $map = array();
     foreach ($list as $i) {
         $key = $f($i);
@@ -29,7 +29,11 @@ function mapBy(&$list,$f) {
             $map[$key] = array();
             $entry = &$map[$key];
         }
-        $entry[] = $i;
+        if ($vf) {
+            $entry[] = $vf($i);
+        } else {
+            $entry[] = $i;
+        }
     }
     return $map;
 }

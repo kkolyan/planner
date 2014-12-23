@@ -100,3 +100,11 @@ table {
 .task-hidden {
     display: none;
 }
+
+.blocked-task {
+    color: #aa0000;
+}
+
+.non-blocked-task {
+    color: #018100;
+}

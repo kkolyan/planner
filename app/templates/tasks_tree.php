@@ -1,0 +1,170 @@
+<html>
+<? include '../www/head.php' ?>
+<body onload="update_toggles()">
+<? include 'menu.php' ?>
+<?
+/** @var $this TasksTreePage */
+?>
+<?
+
+/**
+ * @param TasksTreePage $page
+ * @param $task
+ * @param null $parent_id
+ */
+function render_task($page, $task, $parent_id = null) {
+    $blocked = $page->blocking_by_task[$task->id] and count($page->blocking_by_task[$task->id]) > 0;
+
+    ?><li title="<?=esc($task->title)?>" class="task-visible"><span class="<?= $blocked ? 'blocked-task' : 'non-blocked-task'?>"><?= links(esc($task->title)) ?>
+        <span class="time clickable" onclick="toggle('task_controls<?=$task->id?>')">(<?=esc($task->opened_at)?>)</span></span>
+    <div id="task_controls<?=$task->id?>" class="state-hidden">
+        <div class="controlgroup">
+            <form method="post">
+                <input type="hidden" name="method" value="add_comment"/>
+                <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                <label>
+                    <textarea name="content"></textarea>
+                </label>
+                <input type="submit" value="Добавить Комментарий"/>
+            </form>
+        </div>
+        <div class="controlgroup">
+            <form method="post">
+                <input type="hidden" name="method" value="move_task_up"/>
+                <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                <input type="submit" value="Поднять выше"/>
+            </form>
+            <form method="post">
+                <input type="hidden" name="method" value="move_task_down"/>
+                <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                <input type="submit" value="Опустить ниже"/>
+            </form>
+        </div>
+        <div class="controlgroup">
+            <form method="post">
+                <input type="hidden" name="method" value="full_move_task_up"/>
+                <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                <input type="submit" value="В самый верх"/>
+            </form>
+            <form method="post">
+                <input type="hidden" name="method" value="full_move_task_down"/>
+                <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                <input type="submit" value="В самый низ"/>
+            </form>
+        </div>
+        <div class="controlgroup">
+            <?
+            foreach ($page->categories as $innerCat) {
+                if ($innerCat->id != $cat->id) {
+                    ?>
+                    <form method="post">
+                        <input type="hidden" name="category_id" value="<?=$innerCat->id?>"/>
+                        <input type="hidden" name="method" value="change_category"/>
+                        <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                        <input type="submit" value="В <?=esc($innerCat->title)?>"/>
+                    </form>
+                <?
+                }
+            }
+            ?>
+        </div>
+        <br/>
+        <div class="controlgroup">
+            <form method="post">
+                <input type="hidden" name="method" value="add_blocker"/>
+                <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                <select name="blocking_task_id">
+                    <?
+                    foreach ($page->tasks as $blocking_task_candidate) {
+                        if ($blockers = $page->blocking_by_task[$task->id]) {
+                            if (in_array($blocking_task_candidate->id, $blockers)) {
+                                continue;
+                            }
+                        }
+                        ?><option value="<?=$blocking_task_candidate->id?>"><?=esc($blocking_task_candidate->title)?></option><?
+                    }
+                    ?>
+                </select>
+                <input type="submit" value="Добавить блокирующую задачу"/>
+            </form>
+        </div>
+        <div class="controlgroup">
+            <?
+            if ($parent_id) {
+                ?>
+                <form method="post">
+                    <input type="hidden" name="method" value="remove_blocker"/>
+                    <input type="hidden" name="task_id" value="<?= esc($parent_id) ?>"/>
+                    <input type="hidden" name="blocking_task_id" value="<?= esc($task->id) ?>"/>
+                    <input type="submit" value="Убрать из блокирующих"/>
+                </form>
+                <?
+            }
+            ?>
+        </div>
+    </div>
+    <?
+    if ($comments = $page->comments_by_task[$task->id]) {
+
+        ?><ul><?
+        foreach ($comments as $comment) {
+//            continue;// todo enable comments after blocking implementation
+            ?><li><pre style="display: inline; font-style: italic;"><?=links(esc($comment->content))?></pre> <span class="time">(<?=esc($comment->posted_at)?>)</span></li><?
+        }
+        ?></ul><?
+    }
+    if ($blockers = $page->blocking_by_task[$task->id]) {
+        ?><ul><?
+        foreach ($blockers as $blocker_id) {
+            $blocker = $page->tasks_by_id[$blocker_id];
+            render_task($page, $blocker, $task->id);
+        }
+        ?></ul><?
+    }
+    ?>
+    </li><?
+
+};
+
+if ($this->user) {
+    ?><div class="task-tags-section"><?
+    foreach ($this->tags as $tag => $freq) {
+        ?><span id="tag-<?=esc($tag)?>" class="task-tag-visible" onclick="toggle_tag('<?=esc($tag)?>')" ondblclick="toggle_tags_except('<?=esc($tag)?>')"><?=esc($tag)?> (<?=$freq?>)</span>
+        <script>register_tag('<?=esc($tag)?>')</script>
+    <?
+    }
+    $hint = 'Для создания тегов используйте квадратные скобки. например: [работа] распечатать документы';
+    ?>
+    <a title="<?=$hint?>" href="javascript:alert('<?=$hint?>')"><b> ? </b></a>
+    </div><?
+    if ($this->categories) foreach ($this->categories as $cat) {
+        ?><h4><span class="clickable" onclick="toggle('tasks<?=$cat->id?>')"><?= esc($cat->title) ?></span></h4>
+        <div id="tasks<?=$cat->id?>">
+            <div class="category-section">
+                <form method="post" style="float: right">
+                    <input type="hidden" name="method" value="add_task"/>
+                    <input type="hidden" name="category_id" value="<?= esc($cat->id) ?>"/>
+                    <label>
+                        <textarea name="title" cols="40"></textarea>
+                    </label>
+                    <br/>
+                    <input type="submit" value="Добавить Задачу"/>
+                </form>
+                <ul><?
+                    $tasks = $this->tasks_by_category[$cat->id];
+                    if ($tasks) {
+                        foreach ($tasks as $task) {
+                            render_task($this, $task);
+                        }
+                    }
+                    ?>
+                </ul>
+                <div style="clear: both;"></div>
+            </div>
+        </div>
+    <?
+    }
+}
+?>
+</body>
+</html>
