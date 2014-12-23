@@ -36,14 +36,26 @@ function render_task($page, $cat, $task, $parent_id = null) {
             <pre><?=links(esc($task->notes))?></pre>
             <div class="controlgroup">
                 <form method="post">
+                    <input type="hidden" name="method" value="update_title"/>
+                    <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                    <label>
+                        <input name="title" size="<?=mb_strlen($task->title, 'utf-8')?>" value="<?=esc($task->title)?>"/>
+                    </label>
+                    <input type="submit" value="Обновить заголовок"/>
+                </form>
+            </div>
+            <br/>
+            <div class="controlgroup">
+                <form method="post">
                     <input type="hidden" name="method" value="update_notes"/>
                     <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
                     <label>
-                        <textarea name="content"><?=esc($task->notes)?></textarea>
+                        <textarea rows="<?=count(preg_split('/\n/', $task->notes))?>" cols="<?=max_sub_line($task->notes)?>" name="content"><?=esc($task->notes)?></textarea>
                     </label>
                     <input type="submit" value="Обновить заметки"/>
                 </form>
             </div>
+            <br/>
             <div class="controlgroup">
                 <form method="post">
                     <input type="hidden" name="method" value="move_task_up"/>
@@ -56,6 +68,7 @@ function render_task($page, $cat, $task, $parent_id = null) {
                     <input type="submit" value="Опустить ниже"/>
                 </form>
             </div>
+            <br/>
             <div class="controlgroup">
                 <form method="post">
                     <input type="hidden" name="method" value="full_move_task_up"/>
@@ -68,6 +81,7 @@ function render_task($page, $cat, $task, $parent_id = null) {
                     <input type="submit" value="В самый низ"/>
                 </form>
             </div>
+            <br/>
             <div class="controlgroup">
                 <?
                 foreach ($page->categories as $innerCat) {
@@ -92,15 +106,13 @@ function render_task($page, $cat, $task, $parent_id = null) {
                     <select name="blocking_task_id">
                         <?
                         foreach ($page->tasks as $blocking_task_candidate) {
-                            if ($blocking_task_candidate->category_id != $cat->id) {
-                                continue;
-                            }
                             if ($blockers = $page->blocking_by_task[$task->id]) {
                                 if (in_array($blocking_task_candidate->id, $blockers)) {
                                     continue;
                                 }
                             }
-                            ?><option value="<?=$blocking_task_candidate->id?>"><?=esc($blocking_task_candidate->title)?></option><?
+                            $candidate_category = $page->category_by_id[$blocking_task_candidate->category_id];
+                            ?><option class="cite<?=$candidate_category->id?>" value="<?=$blocking_task_candidate->id?>"><?=esc($blocking_task_candidate->title)?> (<?=$candidate_category->title?>)</option><?
                         }
                         ?>
                     </select>

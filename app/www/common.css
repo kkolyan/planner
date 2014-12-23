@@ -28,7 +28,7 @@ form {
     height: 30px;
     padding-left: 20px;
     margin-left: 10px;
-    display: inline;
+    display: inline-block;
 }
 
 .cite1 {

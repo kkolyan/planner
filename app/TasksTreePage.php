@@ -6,6 +6,7 @@ ensure_backup('Y.m.d');
 
 class TasksTreePage extends UserPage {
     public $categories;
+    public $category_by_id;
     public $tasks;
     public $blocks;
     public $tasks_by_category;
@@ -22,9 +23,26 @@ class TasksTreePage extends UserPage {
         }
     }
 
+    function update_title($params) {
+        if ($user_id = $_SESSION['user_id']) {
+            $old_value = selectCell('select title from planner_task where id = '.intval($params->task_id));
+            update("update planner_task set title = '".esc_sql($params->title)."' where id = ".intval($params->task_id));
+            insert("insert into planner_change_event
+                (item_id, item_type, old_value, new_value) values
+                (".intval($params->task_id).", 'task.title', '".esc_sql($old_value)."', '".esc_sql($params->title)."')");
+        }
+    }
+
     function update_notes($params) {
         if ($user_id = $_SESSION['user_id']) {
+            $old_value = selectCell('select notes from planner_task where id = '.intval($params->task_id));
+            if (!$old_value) {
+                $old_value = 'NULL';
+            }
             update("update planner_task set notes = '".esc_sql($params->content)."' where id = ".intval($params->task_id));
+            insert("insert into planner_change_event
+                (item_id, item_type, old_value, new_value) values
+                (".intval($params->task_id).", 'task.notes', '".esc_sql($old_value)."', '".esc_sql($params->content)."')");
         }
     }
 
@@ -120,6 +138,8 @@ class TasksTreePage extends UserPage {
                 on t.id = b.blocked_task_id
                 or t.id = b.blocking_task_id
                 where t.user_id = $user_id");
+
+            $this->category_by_id = mapUniqueBy($this->categories, function($i) {return $i->id;});
 
             $this->blocking_by_task = mapBy($this->blocks, function($i) { return $i->blocked_task_id; }, function($i) { return $i->blocking_task_id; });
             $this->blocked_by_task = mapBy($this->blocks, function($i) { return $i->blocking_task_id; }, function($i) { return $i->blocked_task_id; });

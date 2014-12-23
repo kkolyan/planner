@@ -37,6 +37,22 @@ class HistoryPage extends UserPage {
                             (select title from planner_category where id = target_category_id) a4
                         from planner_task_category_change
                         where task_id in (select id from planner_task where user_id = $user_id)
+                    union
+                        select at, 'Заголовок задачи %1 (%2) заменен на %3' f,
+                            old_value a1,
+                            item_id a2,
+                            new_value a3,
+                            null a4
+                        from planner_change_event
+                        where item_type = 'task.title'
+                    union
+                        select at, 'Заметки задачи %1 (%2) заменены с %3 на %4' f,
+                            (select title from planner_task where id = item_id) a1,
+                            item_id a2,
+                            old_value a3,
+                            new_value a4
+                        from planner_change_event
+                        where item_type = 'task.notes'
                 ) s order by s.`at` desc
             ");
 

@@ -20,6 +20,40 @@ function format_date($date, $pattern) {
     return $d->format($pattern);
 }
 
+function max_sub_line($text) {
+    $lines = preg_split('/\n|\r/',$text);
+    $n = 0;
+    foreach ($lines as $line) {
+        $n = max(mb_strlen($line, 'utf-8'), $n);
+    }
+    return $n;
+}
+
+/**
+ * @param array $list
+ * @param callable $f
+ * @param callable $vf
+ * @return array
+ */
+function mapUniqueBy(&$list, $f, $vf=null) {
+    $map = array();
+    foreach ($list as $i) {
+        $key = $f($i);
+        if ($vf) {
+            $map[$key] = $vf($i);
+        } else {
+            $map[$key] = $i;
+        }
+    }
+    return $map;
+}
+
+/**
+ * @param array $list
+ * @param callable $f
+ * @param callable $vf
+ * @return array
+ */
 function mapBy(&$list, $f, $vf=null) {
     $map = array();
     foreach ($list as $i) {
