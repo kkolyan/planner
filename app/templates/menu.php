@@ -1,8 +1,12 @@
 <?
 if ($this->user) {
+    ?>
+    <a href=".">Главная</a>
+    <a href="history.php">История</a>
+    <a style="text-decoration: line-through" href="tasks.php">Старая Страница задач</a>
+    <?
     if ($this->user->admin == 'Y') {
         ?>
-        <a href=".">Главная</a>
         <a href="invites.php">Приглашения</a>
         <a href="email_backup.php">Бэкап</a>
     <?
