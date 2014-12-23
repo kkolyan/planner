@@ -21,17 +21,15 @@ function incrementAndGet() {
  * @param $task
  * @param $parent_id
  */
-function render_task($page, $cat, $task, $parent_id = null) {
+function render_task($page, $cat, $task, $path, $parent_id) {
     if (!$page->is_of_category($task->id, $cat->id)) {
         return;
     }
     $blocked = $page->blocking_by_task[$task->id] and count($page->blocking_by_task[$task->id]) > 0;
 
-    $task_view_id = incrementAndGet();
-
     ?><li title="<?=esc($task->title)?>" class="task-visible"><span class="<?= $blocked ? 'blocked-task' : 'non-blocked-task'?>"><?= links(esc($task->title)) ?>
-        <span class="time clickable" onclick="toggle('task_controls<?=$task_view_id?>')">(<?=esc($task->opened_at)?>)</span></span>
-    <div id="task_controls<?=$task_view_id?>" class="state-hidden">
+        <span class="time clickable" onclick="toggle('task_controls<?=$path.'_'.$task->id?>')">(<?=esc($task->opened_at)?>)</span></span>
+    <div id="task_controls<?=$path.'_'.$task->id?>" class="state-hidden">
         <div class="task_content">
             <pre><?=links(esc($task->notes))?></pre>
             <div class="controlgroup">
@@ -140,7 +138,7 @@ function render_task($page, $cat, $task, $parent_id = null) {
         ?><ul><?
         foreach ($blockers as $blocker_id) {
             $blocker = $page->tasks_by_id[$blocker_id];
-            render_task($page, $cat, $blocker, $task->id);
+            render_task($page, $cat, $blocker, $path.'_'.$task->id, $task->id);
         }
         ?></ul><?
     }
@@ -185,7 +183,7 @@ if ($this->user) {
                                     }
                                 }
                             }
-                            render_task($this, $cat, $task);
+                            render_task($this, $cat, $task, '', null);
                         }
                     }
                     ?>
