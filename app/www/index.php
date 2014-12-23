@@ -1,2 +1,2 @@
 <?
-header('Location: ./tasks.php');
+header('Location: ./tasks_tree.php');
