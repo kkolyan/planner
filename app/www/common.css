@@ -108,3 +108,12 @@ table {
 .non-blocked-task {
     color: #018100;
 }
+
+.task_content {
+    border: solid 1px #CCC;
+    background-color: rgba(255, 222, 184, 0.58);
+    padding-top: 0px;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-bottom: 12px;
+}

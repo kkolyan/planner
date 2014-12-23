@@ -37,14 +37,15 @@ if ($this->user) {
                             ?><li title="<?=esc($task->title)?>" class="task-visible"><span><?= links(esc($task->title)) ?>
                                 <span class="time clickable" onclick="toggle('task_controls<?=$task->id?>')">(<?=esc($task->opened_at)?>)</span></span>
                             <div id="task_controls<?=$task->id?>" class="state-hidden">
+                                <pre style="margin-left: 50px"><?=links(esc($task->notes))?></pre>
                                 <div class="controlgroup">
                                     <form method="post">
-                                        <input type="hidden" name="method" value="add_comment"/>
+                                        <input type="hidden" name="method" value="update_notes"/>
                                         <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
                                         <label>
-                                            <textarea name="content"></textarea>
+                                            <textarea name="content"><?=esc($task->notes)?></textarea>
                                         </label>
-                                        <input type="submit" value="Добавить Комментарий"/>
+                                        <input type="submit" value="Обновить заметки"/>
                                     </form>
                                 </div>
                                 <div class="controlgroup">
@@ -88,16 +89,6 @@ if ($this->user) {
                                     ?>
                                 </div class="controlgroup">
                             </div>
-                            <?
-                            if ($comments = $this->comments_by_task[$task->id]) {
-
-                                ?><ul><?
-                                foreach ($comments as $comment) {
-                                    ?><li><pre style="display: inline"><?=links(esc($comment->content))?></pre> <span class="time">(<?=esc($comment->posted_at)?>)</span></li><?
-                                }
-                                ?></ul><?
-                            }
-                            ?>
                             </li><?
                         }
                     }

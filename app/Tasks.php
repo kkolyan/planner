@@ -7,9 +7,7 @@ ensure_backup('Y.m.d');
 class Tasks extends UserPage {
     public $categories;
     public $tasks;
-    public $comments;
     public $tasks_by_category;
-    public $comments_by_task;
     public $tags;
 
     function add_task($params) {
@@ -20,9 +18,9 @@ class Tasks extends UserPage {
         }
     }
 
-    function add_comment($params) {
+    function update_notes($params) {
         if ($user_id = $_SESSION['user_id']) {
-            insert("insert into planner_task_comment (task_id, content) values ($params->task_id, '".esc_sql($params->content)."')");
+            update("update planner_task set notes = '".esc_sql($params->content)."' where id = ".intval($params->task_id));
         }
     }
 
@@ -99,7 +97,6 @@ class Tasks extends UserPage {
 
             $this->categories = select('select * from planner_category order by `order` asc');
             $this->tasks = select("select * from planner_task where user_id = $user_id order by `order` asc");
-            $this->comments = select('select * from planner_task_comment order by posted_at desc');
 
             $this->tags = array();
             foreach ($this->tasks as $task) {
@@ -118,9 +115,6 @@ class Tasks extends UserPage {
 
             $this->tasks_by_category = mapBy($this->tasks, function($i) {
                 return $i->category_id;
-            });
-            $this->comments_by_task = mapBy($this->comments, function($i) {
-                return $i->task_id;
             });
         }
 

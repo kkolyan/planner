@@ -7,10 +7,8 @@ ensure_backup('Y.m.d');
 class TasksTreePage extends UserPage {
     public $categories;
     public $tasks;
-    public $comments;
     public $blocks;
     public $tasks_by_category;
-    public $comments_by_task;
     public $tags;
     public $blocked_by_task;
     public $blocking_by_task;
@@ -24,9 +22,9 @@ class TasksTreePage extends UserPage {
         }
     }
 
-    function add_comment($params) {
+    function update_notes($params) {
         if ($user_id = $_SESSION['user_id']) {
-            insert("insert into planner_task_comment (task_id, content) values ($params->task_id, '".esc_sql($params->content)."')");
+            update("update planner_task set notes = '".esc_sql($params->content)."' where id = ".intval($params->task_id));
         }
     }
 
@@ -115,7 +113,6 @@ class TasksTreePage extends UserPage {
 
             $this->categories = select('select * from planner_category order by `order` asc');
             $this->tasks = select("select * from planner_task where user_id = $user_id order by `order` asc");
-            $this->comments = select('select * from planner_task_comment order by posted_at desc');
             $this->blocks = select("
                 select distinct b.blocked_task_id, b.blocking_task_id
                 from planner_task_block b
@@ -145,9 +142,6 @@ class TasksTreePage extends UserPage {
             $this->tasks_by_category = mapBy($this->tasks, function($i) {
                 return $i->category_id;
             });
-            $this->comments_by_task = mapBy($this->comments, function($i) {
-                return $i->task_id;
-            });
 
             $this->tasks_by_id = array();
             foreach ($this->tasks as $task) {
@@ -156,6 +150,23 @@ class TasksTreePage extends UserPage {
         }
 
         include "templates/tasks_tree.php";
+    }
+
+    public function is_of_category($task_id, $category_id) {
+        $blockers = $this->blocking_by_task[$task_id];
+        if ($blockers and count($blockers) > 0) {
+            foreach ($blockers as $blocker) {
+                if ($this->is_of_category($blocker, $category_id)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        $task = $this->tasks_by_id[$task_id];
+        if ($task->category_id == $category_id) {
+            return true;
+        }
+        return false;
     }
 
     private function full_move_task($task_id, $up) {
