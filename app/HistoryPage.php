@@ -21,7 +21,7 @@ class HistoryPage extends UserPage {
                         select closed_at `at`, 'Закрыта задача %1 (%2)' f, title a1, id a2, null a3, null a4
                         from planner_task
                         where user_id = $user_id
-                        and closed_at <> null
+                        and closed_at is not null
                     union
                         select posted_at `at`,
                             'Комментарий к задаче %1 (%2): %3' f,
@@ -53,6 +53,22 @@ class HistoryPage extends UserPage {
                             new_value a4
                         from planner_change_event
                         where item_type = 'task.notes'
+                    union
+                        select at, 'Задача %1 (%2) отложена по причине: %3' f,
+                            (select title from planner_task where id = item_id) a1,
+                            item_id a2,
+                            new_value a3,
+                            null a4
+                        from planner_change_event
+                        where item_type = 'task.defer'
+                    union
+                        select at, 'Задача %1 (%2) возобновлена' f,
+                            (select title from planner_task where id = item_id) a1,
+                            item_id a2,
+                            null a3,
+                            null a4
+                        from planner_change_event
+                        where item_type = 'task.resume'
                 ) s order by s.`at` desc
             ");
 

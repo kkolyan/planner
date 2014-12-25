@@ -1,5 +1,5 @@
 
-alter table planner_task add (notes text not null default '');
+alter table planner_task add (notes text);
 
 
 update planner_task t

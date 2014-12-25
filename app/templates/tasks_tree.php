@@ -21,17 +21,31 @@ function incrementAndGet() {
  * @param $task
  * @param $parent_id
  */
-function render_task($page, $cat, $task, $path, $parent_id) {
-    if (!$page->is_of_category($task->id, $cat->id)) {
+function render_task($page, $task, $path, $parent_id) {
+    if (!$task) {
+        throw new Exception();
+    }
+    if (!$page->is_of_category($task->id)) {
         return;
     }
     $blocked = $page->blocking_by_task[$task->id] and count($page->blocking_by_task[$task->id]) > 0;
 
-    ?><li title="<?=esc($task->title)?>" class="task-visible"><span class="<?= $blocked ? 'blocked-task' : 'non-blocked-task'?>"><?= links(esc($task->title)) ?>
-        <span class="time clickable" onclick="toggle('task_controls<?=$path.'_'.$task->id?>')">(<?=esc($task->opened_at)?>)</span></span>
-    <div id="task_controls<?=$path.'_'.$task->id?>" class="state-hidden">
-        <div class="task_content">
-            <pre><?=links(esc($task->notes))?></pre>
+    ?><li title="{id=<?=esc($task->id)?>}<?=esc($task->title)?>" class="task-visible">
+    <?
+    if (is_string($task->deferred_by)) {
+        ?><span class="deferred_by"><?=$task->deferred_by?></span><?
+    }
+    ?>
+    <span class="<?= $blocked ? 'blocked-task' : 'non-blocked-task'?>"><?= links(esc($task->title)) ?>
+        <span class="time">(<?=esc($task->opened_at)?>)</span></span>
+    <span class="clickable" onclick="toggle('task_controls<?=$path.'_'.$task->id?>')" style="flo1at: left;margin: -10px 0; padding: 0px 0;">. . .</span>
+        <?
+        if ($task->notes) {
+            ?><pre class="notes"><?=links(esc($task->notes))?></pre><?
+        }
+        ?>
+        <div id="task_controls<?=$path.'_'.$task->id?>" class="state-hidden">
+            <div class="task_content">
             <div class="controlgroup">
                 <form method="post">
                     <input type="hidden" name="method" value="update_title"/>
@@ -82,19 +96,33 @@ function render_task($page, $cat, $task, $path, $parent_id) {
             <br/>
             <div class="controlgroup">
                 <?
-                foreach ($page->categories as $innerCat) {
-                    if ($innerCat->id != $cat->id) {
-                        ?>
-                        <form method="post">
-                            <input type="hidden" name="category_id" value="<?=$innerCat->id?>"/>
-                            <input type="hidden" name="method" value="change_category"/>
-                            <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
-                            <input type="submit" value="В <?=esc($innerCat->title)?>"/>
-                        </form>
-                    <?
-                    }
+                if ($page->deferred) {
+                    ?>
+                    <form method="post">
+                        <input type="hidden" name="method" value="resume"/>
+                        <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                        <input type="submit" value="Возобновить"/>
+                    </form>
+                <?
+                } else {
+                    ?>
+                    <form method="post">
+                        <input type="hidden" name="method" value="defer"/>
+                        <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                        <input name="deferred_by" value="Какая-то причина"/>
+                        <input type="submit" value="Отложить"/>
+                    </form>
+                <?
                 }
                 ?>
+            </div>
+            <div class="controlgroup">
+                <br/>
+                <form method="post">
+                    <input type="hidden" name="method" value="close"/>
+                    <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
+                    <input type="submit" value="Закрыть"/>
+                </form>
             </div>
             <br/>
             <div class="controlgroup">
@@ -103,14 +131,24 @@ function render_task($page, $cat, $task, $path, $parent_id) {
                     <input type="hidden" name="task_id" value="<?= esc($task->id) ?>"/>
                     <select name="blocking_task_id">
                         <?
-                        foreach ($page->tasks as $blocking_task_candidate) {
+                        foreach ($page->opened_tasks as $blocking_task_candidate) {
+                            if ($blocking_task_candidate->id == $task->id) {
+                                continue;
+                            }
+                            if ($page->is_blocked_by($task->id,$blocking_task_candidate->id)) {
+                                continue;
+                            }
+                            if ($page->is_blocked_by($blocking_task_candidate->id, $task->id)) {
+                                continue;
+                            }
                             if ($blockers = $page->blocking_by_task[$task->id]) {
                                 if (in_array($blocking_task_candidate->id, $blockers)) {
                                     continue;
                                 }
                             }
-                            $candidate_category = $page->category_by_id[$blocking_task_candidate->category_id];
-                            ?><option class="cite<?=$candidate_category->id?>" value="<?=$blocking_task_candidate->id?>"><?=esc($blocking_task_candidate->title)?> (<?=$candidate_category->title?>)</option><?
+                            $deferred = is_string($blocking_task_candidate->deferred_by);
+                            $candidate_category = $deferred ? 1 : 0;
+                            ?><option class="cite<?=$candidate_category?>" value="<?=$blocking_task_candidate->id?>"><?=esc($blocking_task_candidate->title)?> (<?=$deferred ? 'Отложено' : 'Активно'?>)</option><?
                         }
                         ?>
                     </select>
@@ -118,6 +156,7 @@ function render_task($page, $cat, $task, $path, $parent_id) {
                 </form>
             </div>
             <div class="controlgroup">
+                <br/>
                 <?
                 if ($parent_id) {
                     ?>
@@ -138,7 +177,9 @@ function render_task($page, $cat, $task, $path, $parent_id) {
         ?><ul><?
         foreach ($blockers as $blocker_id) {
             $blocker = $page->tasks_by_id[$blocker_id];
-            render_task($page, $cat, $blocker, $path.'_'.$task->id, $task->id);
+            if ($blocker) {
+                render_task($page, $blocker, $path.'_'.$task->id, $task->id);
+            }
         }
         ?></ul><?
     }
@@ -157,42 +198,41 @@ if ($this->user) {
     $hint = 'Для создания тегов используйте квадратные скобки. например: [работа] распечатать документы';
     ?>
     <a title="<?=$hint?>" href="javascript:alert('<?=$hint?>')"><b> ? </b></a>
-    </div><?
-    if ($this->categories) foreach ($this->categories as $cat) {
-        ?><h4><span class="clickable" onclick="toggle('tasks<?=$cat->id?>')"><?= esc($cat->title) ?></span></h4>
-        <div id="tasks<?=$cat->id?>">
-            <div class="category-section">
-                <form method="post" style="float: right">
-                    <input type="hidden" name="method" value="add_task"/>
-                    <input type="hidden" name="category_id" value="<?= esc($cat->id) ?>"/>
-                    <label>
-                        <textarea name="title" cols="40"></textarea>
-                    </label>
-                    <br/>
-                    <input type="submit" value="Добавить Задачу"/>
-                </form>
-                <ul><?
-                    $tasks = $this->tasks;
-                        //$this->tasks_by_category[$cat->id];
-                    if ($tasks) {
-                        foreach ($tasks as $task) {
-                            if ($blocked = $this->blocked_by_task[$task->id]) {
-                                foreach ($blocked as $b) {
-                                    if ($this->is_of_category($b, $cat->id)) {
-                                        continue 2;
-                                    }
-                                }
-                            }
-                            render_task($this, $cat, $task, '', null);
-                        }
-                    }
-                    ?>
-                </ul>
-                <div style="clear: both;"></div>
-            </div>
-        </div>
+    </div>
+
+    <br/>
+    <form method="post" style="float: right">
+        <input type="hidden" name="method" value="add_task"/>
+        <input type="hidden" name="category_id" value="<?= esc($cat->id) ?>"/>
+        <label>
+            <textarea name="title" cols="40"></textarea>
+        </label>
+        <br/>
+        <input type="submit" value="Добавить Задачу"/>
+    </form>
     <?
+    $cur_count = count($this->tasks);
+    $alt_count = count($this->opened_tasks) - count($this->tasks);
+    if ($this->deferred) {
+        ?><a href="?mode=active">Активные (<?=$alt_count?>)</a> <b>Отложенные (<?=$cur_count?>)</b><?
+    } else {
+        ?><b>Активные (<?=$cur_count?>)</b> <a href="?mode=deferred">Отложенные (<?=$alt_count?>)</a><?
     }
+    ?>
+    <ul><?
+        foreach ($this->opened_tasks as $task) {
+            if ($blocked = $this->blocked_by_task[$task->id]) {
+                foreach ($blocked as $b) {
+                    if ($this->is_of_category($b)) {
+                        continue 2;
+                    }
+                }
+            }
+            render_task($this, $task, '', null);
+        }
+        ?>
+    </ul>
+    <?
 }
 ?>
 </body>

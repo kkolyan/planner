@@ -21,6 +21,7 @@ form {
 }
 .linkbutton:hover, .clickable:hover {
     text-decoration: underline;
+    background-color: rgba(14, 136, 0, 0.07);
 }
 
 .controlgroup {
@@ -44,8 +45,10 @@ form {
     color: #c39165;
 }
 
-pre {
+.notes {
+    margin: 0;
     white-space: pre-wrap;
+    padding: 5px 20px;
 }
 
 h4 {
@@ -112,8 +115,9 @@ table {
 .task_content {
     border: solid 1px #CCC;
     background-color: rgba(255, 222, 184, 0.58);
-    padding-top: 0px;
-    padding-right: 20px;
-    padding-left: 20px;
-    padding-bottom: 12px;
+    padding: 12px 20px;
+}
+
+.deferred_by {
+    color: rgba(0, 100, 136, 0.49);
 }

@@ -5,21 +5,56 @@ require_once 'mvc.php';
 ensure_backup('Y.m.d');
 
 class TasksTreePage extends UserPage {
-    public $categories;
-    public $category_by_id;
     public $tasks;
+    public $opened_tasks;
     public $blocks;
-    public $tasks_by_category;
     public $tags;
     public $blocked_by_task;
     public $blocking_by_task;
     public $tasks_by_id;
 
+    public $deferred;
+
+    function close($params) {
+        if ($user_id = $_SESSION['user_id']) {
+            update("
+                update planner_task
+                set closed_at = now()
+                where id = ".intval($params->task_id));
+        }
+    }
+
+    function defer($params) {
+        if ($user_id = $_SESSION['user_id']) {
+            update("
+                update planner_task
+                set deferred_by = '".esc_sql($params->deferred_by)."'
+                where id = ".intval($params->task_id));
+            insert("insert into planner_change_event
+                (item_id, item_type, old_value, new_value) values
+                (".intval($params->task_id).", 'task.defer', null, '".esc_sql($params->deferred_by)."')");
+        }
+    }
+
+    function resume($params) {
+        if ($user_id = $_SESSION['user_id']) {
+            update("
+                update planner_task
+                set deferred_by = null
+                where id = ".intval($params->task_id));
+            insert("insert into planner_change_event
+                (item_id, item_type, old_value, new_value) values
+                (".intval($params->task_id).", 'task.resume', null, null)");
+        }
+    }
+
     function add_task($params) {
         if ($user_id = $_SESSION['user_id']) {
-            $smallest_order = selectCell("select min(`order`) from planner_task where category_id = $params->category_id");
+            $smallest_order = selectCell("
+                select min(`order`) from planner_task
+                where not closed_at");
             $smallest_order = intval($smallest_order);
-            $task_id = insert("insert into planner_task (category_id, title, `order`, user_id) values ($params->category_id, '".esc_sql($params->title)."',$smallest_order - 1, $user_id)");
+            $task_id = insert("insert into planner_task (title, `order`, user_id) values ('".esc_sql($params->title)."',$smallest_order - 1, $user_id)");
         }
     }
 
@@ -127,10 +162,23 @@ class TasksTreePage extends UserPage {
 
         if ($this->user) {
 
+            $this->deferred = $this->mode == 'deferred';
+
             $user_id = $this->user->id;
 
-            $this->categories = select('select * from planner_category order by `order` asc');
-            $this->tasks = select("select * from planner_task where user_id = $user_id order by `order` asc");
+            $this->tasks = select("
+                select * from planner_task
+                where user_id = $user_id
+                and not closed_at
+                and deferred_by is ".($this->deferred ? 'not' : '')." null
+                order by `order` asc");
+
+            $this->opened_tasks = select("
+                select * from planner_task
+                where user_id = $user_id
+                and not closed_at
+                order by opened_at desc");
+
             $this->blocks = select("
                 select distinct b.blocked_task_id, b.blocking_task_id
                 from planner_task_block b
@@ -139,13 +187,11 @@ class TasksTreePage extends UserPage {
                 or t.id = b.blocking_task_id
                 where t.user_id = $user_id");
 
-            $this->category_by_id = mapUniqueBy($this->categories, function($i) {return $i->id;});
-
             $this->blocking_by_task = mapBy($this->blocks, function($i) { return $i->blocked_task_id; }, function($i) { return $i->blocking_task_id; });
             $this->blocked_by_task = mapBy($this->blocks, function($i) { return $i->blocking_task_id; }, function($i) { return $i->blocked_task_id; });
 
             $this->tags = array();
-            foreach ($this->tasks as $task) {
+            foreach ($this->opened_tasks as $task) {
                 preg_match_all('/\[([A-z0-9А-я ]*?)\]/u',$task->title, $matches);
                 if (!$matches[1]) {
                     $matches[1] = array('');
@@ -159,12 +205,8 @@ class TasksTreePage extends UserPage {
                 }
             }
 
-            $this->tasks_by_category = mapBy($this->tasks, function($i) {
-                return $i->category_id;
-            });
-
             $this->tasks_by_id = array();
-            foreach ($this->tasks as $task) {
+            foreach ($this->opened_tasks as $task) {
                 $this->tasks_by_id[$task->id] = $task;
             }
         }
@@ -172,19 +214,33 @@ class TasksTreePage extends UserPage {
         include "templates/tasks_tree.php";
     }
 
-    public function is_of_category($task_id, $category_id) {
+    public function is_of_category($task_id) {
         $blockers = $this->blocking_by_task[$task_id];
         if ($blockers and count($blockers) > 0) {
             foreach ($blockers as $blocker) {
-                if ($this->is_of_category($blocker, $category_id)) {
+                if ($this->is_of_category($blocker)) {
                     return true;
                 }
             }
             return false;
         }
         $task = $this->tasks_by_id[$task_id];
-        if ($task->category_id == $category_id) {
+        if ($task->deferred_by ? $this->deferred : !$this->deferred) {
             return true;
+        }
+        return false;
+    }
+
+    public function is_blocked_by($task_id, $by_id) {
+        if ($blocked_by_ids = $this->blocked_by_task[$by_id]) {
+            if (in_array($task_id, $blocked_by_ids)) {
+                return true;
+            }
+            foreach ($blocked_by_ids as $blocked_by_id) {
+                if ($this->is_blocked_by($task_id, $blocked_by_id)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
