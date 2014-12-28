@@ -45,6 +45,7 @@ class HistoryPage extends UserPage {
                             null a4
                         from planner_change_event
                         where item_type = 'task.title'
+                        and item_id in (select id from planner_task where user_id = $user_id)
                     union
                         select at, 'Заметки задачи %1 (%2) заменены с %3 на %4' f,
                             (select title from planner_task where id = item_id) a1,
@@ -53,6 +54,7 @@ class HistoryPage extends UserPage {
                             new_value a4
                         from planner_change_event
                         where item_type = 'task.notes'
+                        and item_id in (select id from planner_task where user_id = $user_id)
                     union
                         select at, 'Задача %1 (%2) отложена по причине: %3' f,
                             (select title from planner_task where id = item_id) a1,
@@ -61,6 +63,7 @@ class HistoryPage extends UserPage {
                             null a4
                         from planner_change_event
                         where item_type = 'task.defer'
+                        and item_id in (select id from planner_task where user_id = $user_id)
                     union
                         select at, 'Задача %1 (%2) возобновлена' f,
                             (select title from planner_task where id = item_id) a1,
@@ -69,6 +72,7 @@ class HistoryPage extends UserPage {
                             null a4
                         from planner_change_event
                         where item_type = 'task.resume'
+                        and item_id in (select id from planner_task where user_id = $user_id)
                 ) s order by s.`at` desc
             ");
 
